@@ -137,8 +137,9 @@ public:
     enum class Configuration {
         Autopilot, /**< @brief SDK is used as an autopilot. */
         GroundStation, /**< @brief SDK is used as a ground station. */
-        CompanionComputer /**< @brief SDK is used on a companion computer onboard the system (e.g.
-                             drone). */
+        CompanionComputer, /**< @brief SDK is used on a companion computer onboard the system (e.g. drone). */
+        PayloadManager, /**< @brief SDK is used for the ALERION payload manager, beside the GCS */
+        PayloadComputer /**< @brief SDK is used for the ALERION payload computer, beside other Companion computers */
     };
 
     /**

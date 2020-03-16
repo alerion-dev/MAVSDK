@@ -322,6 +322,14 @@ uint8_t MavsdkImpl::get_own_system_id() const
             // add auto detection for it.
             return 1;
 
+        case Mavsdk::Configuration::PayloadManager:
+            return MAV_COMP_ID_USER1;
+
+        case Mavsdk::Configuration::PayloadComputer:
+            // FIXME: This should be the same as the drone but we need to
+            // add auto detection for it.
+            return 1;
+
         default:
             LogErr() << "Unknown configuration";
             return 0;
@@ -342,6 +350,12 @@ uint8_t MavsdkImpl::get_own_component_id() const
             // It's at least a possibility that we are bridging MAVLink traffic.
             return MAV_COMP_ID_UDP_BRIDGE;
 
+        case Mavsdk::Configuration::PayloadManager:
+            return MAV_COMP_ID_USER1;
+            
+        case Mavsdk::Configuration::PayloadComputer:
+            return MAV_COMP_ID_USER1;
+
         default:
             LogErr() << "Unknown configuration";
             return 0;
@@ -358,6 +372,12 @@ uint8_t MavsdkImpl::get_mav_type() const
             return MAV_TYPE_GCS;
 
         case Mavsdk::Configuration::CompanionComputer:
+            return MAV_TYPE_ONBOARD_CONTROLLER;
+
+        case Mavsdk::Configuration::PayloadManager:
+            return MAV_TYPE_GCS;
+            
+        case Mavsdk::Configuration::PayloadComputer:
             return MAV_TYPE_ONBOARD_CONTROLLER;
 
         default:

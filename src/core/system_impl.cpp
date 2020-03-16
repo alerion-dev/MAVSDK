@@ -345,6 +345,8 @@ std::string SystemImpl::component_name(uint8_t component_id)
             return "Camera 6";
         case MAV_COMP_ID_GIMBAL:
             return "Gimbal";
+        case MAV_COMP_ID_USER1:
+            return "User";
         default:
             return "Unsupported component";
     }
@@ -364,6 +366,8 @@ ComponentType SystemImpl::component_type(uint8_t component_id)
             return CAMERA;
         case MAV_COMP_ID_GIMBAL:
             return GIMBAL;
+        case MAV_COMP_ID_USER1:
+            return USER;
         default:
             return UNKNOWN;
     }
