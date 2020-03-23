@@ -144,7 +144,8 @@ bool UdpConnection::send_message(const mavlink_message_t& message)
 
     bool send_successful = true;
     for (auto& remote : _remotes) {
-        if (target_system_id != 0 && remote.system_id != target_system_id) {
+        if (target_system_id != 0 &&
+            std::find(remote.system_ids.begin(), remote.system_ids.end(), target_system_id) == remote.system_ids.end()) {
             continue;
         }
 
@@ -187,22 +188,22 @@ void UdpConnection::add_remote_with_remote_sysid(
     Remote new_remote;
     new_remote.ip = remote_ip;
     new_remote.port_number = remote_port;
-    new_remote.system_id = remote_sysid;
+    new_remote.system_ids.push_back(remote_sysid);
 
     auto existing_remote =
         std::find_if(_remotes.begin(), _remotes.end(), [&new_remote](const Remote& remote) {
             return (remote.ip == new_remote.ip && remote.port_number == new_remote.port_number);
         });
 
+    const auto& sys_ids = existing_remote->system_ids;
     if (existing_remote == _remotes.end()) {
-        LogInfo() << "New system on: " << new_remote.ip << ":" << new_remote.port_number
-                  << " (with sysid: " << (int)new_remote.system_id << ")";
+        LogInfo() << "New system on new remote: " << new_remote.ip << ":" << new_remote.port_number
+                  << " (with sysid: " << (int)remote_sysid << ")";
         _remotes.push_back(new_remote);
-    } else if (existing_remote->system_id != new_remote.system_id) {
-        LogWarn() << "System on: " << new_remote.ip << ":" << new_remote.port_number
-                  << " changed system ID (" << int(existing_remote->system_id) << " to "
-                  << int(new_remote.system_id) << ")";
-        existing_remote->system_id = new_remote.system_id;
+    } else if (std::find(sys_ids.begin(), sys_ids.end(), remote_sysid) == sys_ids.end()) {
+        LogInfo() << "New system on existing remote: " << existing_remote->ip << ":" << existing_remote->port_number
+                  << " (with sysid: " << (int)remote_sysid << ")";
+        existing_remote->system_ids.push_back(remote_sysid);
     }
 }
 
@@ -243,34 +244,8 @@ void UdpConnection::receive()
         while (_mavlink_receiver->parse_message()) {
             const uint8_t sysid = _mavlink_receiver->get_last_message().sysid;
 
-            // FIXME: We ignore messages from QGC (255) for now.
-            if (!saved_remote && sysid != 0 && sysid != 255) {
+            if (!saved_remote && sysid != 0) {
                 saved_remote = true;
-                {
-                    std::lock_guard<std::mutex> lock(_remote_mutex);
-                    Remote new_remote;
-                    new_remote.ip = inet_ntoa(src_addr.sin_addr);
-                    new_remote.port_number = ntohs(src_addr.sin_port);
-                    new_remote.system_id = sysid;
-
-                    auto existing_remote = std::find_if(
-                        _remotes.begin(), _remotes.end(), [&new_remote](const Remote& remote) {
-                            return (
-                                remote.ip == new_remote.ip &&
-                                remote.port_number == new_remote.port_number);
-                        });
-
-                    if (existing_remote == _remotes.end()) {
-                        LogInfo() << "New system on: " << new_remote.ip << ":"
-                                  << new_remote.port_number;
-                        _remotes.push_back(new_remote);
-                    } else if (existing_remote->system_id != new_remote.system_id) {
-                        LogWarn() << "System on: " << new_remote.ip << ":" << new_remote.port_number
-                                  << " changed system ID (" << int(existing_remote->system_id)
-                                  << " to " << int(new_remote.system_id) << ")";
-                        existing_remote->system_id = new_remote.system_id;
-                    }
-                }
                 add_remote_with_remote_sysid(
                     inet_ntoa(src_addr.sin_addr), ntohs(src_addr.sin_port), sysid);
             }

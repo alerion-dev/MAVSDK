@@ -50,7 +50,7 @@ private:
             return ip == other.ip && port_number == other.port_number;
         }
 
-        uint8_t system_id{0};
+        std::vector<uint8_t> system_ids{};
     };
     std::vector<Remote> _remotes{};
 

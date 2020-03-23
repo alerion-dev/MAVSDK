@@ -351,7 +351,7 @@ uint8_t MavsdkImpl::get_own_component_id() const
             return MAV_COMP_ID_UDP_BRIDGE;
 
         case Mavsdk::Configuration::PayloadManager:
-            return MAV_COMP_ID_USER1;
+            return MAV_COMP_ID_USER5;
             
         case Mavsdk::Configuration::PayloadComputer:
             return MAV_COMP_ID_USER1;
@@ -375,7 +375,7 @@ uint8_t MavsdkImpl::get_mav_type() const
             return MAV_TYPE_ONBOARD_CONTROLLER;
 
         case Mavsdk::Configuration::PayloadManager:
-            return MAV_TYPE_GCS;
+            return MAV_TYPE_GENERIC;
             
         case Mavsdk::Configuration::PayloadComputer:
             return MAV_TYPE_ONBOARD_CONTROLLER;
