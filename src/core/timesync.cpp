@@ -38,6 +38,9 @@ void Timesync::process_timesync(const mavlink_message_t& message)
 
     mavlink_msg_timesync_decode(&message, &timesync);
 
+    // Do not process TIMESYNC from anything other than autopilot
+    if(message.sysid != 1 || message.compid != MAV_COMP_ID_AUTOPILOT1) return;
+
     int64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
                          _parent.get_autopilot_time().now().time_since_epoch())
                          .count();
